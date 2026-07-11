@@ -37,6 +37,15 @@ http://localhost:5173
 
 ---
 
+## After Pulling Latest Changes
+
+If the database schema has changed:
+
+```bash
+yarn dev:migration
+
+
+
 ## Database
 
 Whenever a new schema is created or an existing schema is modified:
