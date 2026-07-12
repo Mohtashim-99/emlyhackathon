@@ -1,37 +1,50 @@
 volumes:
   mysql_data: null
   repo: null
+  mongo_data: null
+
 services:
   feast:
-      image: remis_feast:dev
-      container_name: feast_backend
-      working_dir: /app/apps/feast
-      command: yarn dev
-      build:
-        context: ../../
-        dockerfile: ./docker/feast/Dockerfile
-      volumes:
-        - "repo:/app"
-        - "../../:/app"
-      depends_on:
-        - mysql
-        - redis
-      environment:
-        PORT: 3000
-        DATABASE_HOST: mysql
-        DATABASE_PORT: 3306
-        DATABASE_USER: root
-        DATABASE_PASSWORD: "${DATABASE_PASSWORD:-feastpassword}"
-        DATABASE_NAME: feast
-        APP_NAME: Feast
-        REDIS_HOST: redis
-        REDIS_PORT: 6379
-        REDIS_TTL: 60
+    image: remis_feast:dev
+    container_name: feast_backend
+    working_dir: /app/apps/feast
+    command: yarn dev
+    build:
+      context: ../../
+      dockerfile: ./docker/feast/Dockerfile
+    volumes:
+      - "repo:/app"
+      - "../../:/app"
+    depends_on:
+      - mysql
+      - redis
+      - mongodb
+    environment:
+      PORT: 3000
 
-      ports:
-        - "3000:3000"
-      networks:
-        - feast_dev
+      DATABASE_HOST: mysql
+      DATABASE_PORT: 3306
+      DATABASE_USER: root
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD:-feastpassword}"
+      DATABASE_NAME: feast
+
+      APP_NAME: Feast
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_TTL: 60
+
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_DATABASE: feast_mongo
+      MONGO_USERNAME: admin
+      MONGO_PASSWORD: "${MONGO_PASSWORD:-mongopassword}"
+
+    ports:
+      - "3000:3000"
+    networks:
+      - feast_dev
+
   mysql:
     image: "mysql:8.0"
     container_name: feast_mysql
@@ -44,11 +57,44 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - feast_dev
+
   redis:
     container_name: feast_redis
     image: "redis/redis-stack-server:7.2.0-v17"
     ports:
       - "6379:6379"
+    networks:
+      - feast_dev
+
+  mongodb:
+    image: mongo:8
+    container_name: feast_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_PASSWORD:-mongopassword}"
+      MONGO_INITDB_DATABASE: feast_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - feast_dev
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: feast_mongo_express
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "${MONGO_PASSWORD:-mongopassword}"
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: pass
+    ports:
+      - "8081:8081"
     networks:
       - feast_dev
   migration: 

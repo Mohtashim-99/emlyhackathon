@@ -11,11 +11,13 @@
     "dev:mysql": "docker compose -f ./docker/feast/docker-compose-dev.yml up -d mysql",
     "dev:studio": "docker compose -f ./docker/feast/docker-compose-dev.yml up -d studio",
     "dev:migration": "docker compose -f ./docker/feast/docker-compose-dev.yml run --rm migration",
+    "dev:mongo-express": "docker compose -f ./docker/feast/docker-compose-dev.yml up -d mongo-express",
     "stop:feast": "docker compose -f ./docker/feast/docker-compose-dev.yml down feast mysql studio migration",
     "logs:feast": "docker logs $(docker ps --filter 'name=feast_backend' --format '{{.ID}}') -f",
     "logs:mysql": "docker logs $(docker ps --filter 'name=feast_mysql' --format '{{.ID}}') -f",
     "logs:studio": "docker logs $(docker ps --filter 'name=feast_studio' --format '{{.ID}}') -f",
     "logs:migration": "docker logs $(docker ps --filter 'name=feast_migration' --format '{{.ID}}') -f",
+    "logs:mongo-express": "docker logs $(docker ps --filter 'name=feast_mongo_express' --format '{{.ID}}') -f",
     "list:containers": "docker ps --format '{{.ID}} {{.Names}}'",
     "kill:docker": "docker kill $(docker ps -q)",
     "test": "turbo test"
