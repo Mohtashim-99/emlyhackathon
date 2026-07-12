@@ -17,7 +17,8 @@
     "logs:studio": "docker logs $(docker ps --filter 'name=feast_studio' --format '{{.ID}}') -f",
     "logs:migration": "docker logs $(docker ps --filter 'name=feast_migration' --format '{{.ID}}') -f",
     "list:containers": "docker ps --format '{{.ID}} {{.Names}}'",
-    "kill:docker": "docker kill $(docker ps -q)"
+    "kill:docker": "docker kill $(docker ps -q)",
+    "test": "turbo test"
   },
   "devDependencies": {
     "prettier": "^3.7.4",
